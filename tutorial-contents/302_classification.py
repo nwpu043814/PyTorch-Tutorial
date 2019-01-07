@@ -10,12 +10,12 @@ import torch
 import  numpy as np
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-from torch.autograd import Variable
+import  random
 
 # torch.manual_seed(1)    # reproducible
 
 # make fake data
-n_data = torch.ones(100, 2)
+n_data = torch.ones(100, 60)
 x0 = torch.normal(2*n_data, 1)      # class0 x data (tensor), shape=(100, 2)
 y0 = torch.zeros(100)               # class0 y data (tensor), shape=(100, 1)
 x1 = torch.normal(-2*n_data, 1)     # class1 x data (tensor), shape=(100, 2)
@@ -41,15 +41,15 @@ class Net(torch.nn.Module):
         x = self.out(x)
         return x
 
-net = Net(n_feature=2, n_hidden=10, n_output=2)     # define the network
+net = Net(n_feature=60, n_hidden=10, n_output=2)     # define the network
 print(net)  # net architecture
 
-optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
+optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
 loss_func = torch.nn.CrossEntropyLoss()  # the target label is NOT an one-hotted
 
 plt.ion()   # something about plotting
 
-for t in range(1000):
+for t in range(100):
     out = net(x)                 # input x and predict based on x
     loss = loss_func(out, y)     # must be (1. nn output, 2. target), the target label is NOT one-hotted
     # print(out)
@@ -72,12 +72,12 @@ for t in range(1000):
         plt.text(1.5, -4, 'Accuracy=%.2f' % accuracy, fontdict={'size': 20, 'color':  'red'})
         plt.pause(0.1)
 
-test_input = np.array([[-1.9, -1.8],[1.9, 7.8]])#两个测试点的横纵坐标。
+test_input = np.array([ random.randint(-200, 310)/100 for x in range(60) ])#两个测试点的横纵坐标。
 te = torch.from_numpy(test_input)#包装为张量
 print("input:",te.data.numpy())
 test_out = net(te.type(torch.FloatTensor))
 print('out:',test_out.data.numpy())
-print('ret:',torch.max(test_out, 1)[1].data.numpy())
+print('ret:',torch.max(test_out, 0)[1].data.numpy())
 
 
 plt.ioff()

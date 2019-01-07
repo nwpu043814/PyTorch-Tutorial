@@ -14,8 +14,10 @@ import  random
 
 # torch.manual_seed(1)    # reproducible
 
+INPUT_DIM = 180
+
 # make fake data
-n_data = torch.ones(100, 60)
+n_data = torch.ones(100, INPUT_DIM)
 x0 = torch.normal(2*n_data, 1)      # class0 x data (tensor), shape=(100, 2)
 y0 = torch.zeros(100)               # class0 y data (tensor), shape=(100, 1)
 x1 = torch.normal(-2*n_data, 1)     # class1 x data (tensor), shape=(100, 2)
@@ -41,7 +43,7 @@ class Net(torch.nn.Module):
         x = self.out(x)
         return x
 
-net = Net(n_feature=60, n_hidden=10, n_output=2)     # define the network
+net = Net(n_feature=INPUT_DIM, n_hidden=10, n_output=2)     # define the network
 print(net)  # net architecture
 
 optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
@@ -72,7 +74,7 @@ for t in range(100):
         plt.text(1.5, -4, 'Accuracy=%.2f' % accuracy, fontdict={'size': 20, 'color':  'red'})
         plt.pause(0.1)
 
-test_input = np.array([ random.randint(-200, 310)/100 for x in range(60) ])#两个测试点的横纵坐标。
+test_input = np.array([ random.randint(-200, 310)/100 for x in range(INPUT_DIM) ])#两个测试点的横纵坐标。
 te = torch.from_numpy(test_input)#包装为张量
 print("input:",te.data.numpy())
 test_out = net(te.type(torch.FloatTensor))

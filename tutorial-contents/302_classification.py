@@ -7,8 +7,10 @@ torch: 0.4
 matplotlib
 """
 import torch
+import  numpy as np
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
+from torch.autograd import Variable
 
 # torch.manual_seed(1)    # reproducible
 
@@ -42,29 +44,41 @@ class Net(torch.nn.Module):
 net = Net(n_feature=2, n_hidden=10, n_output=2)     # define the network
 print(net)  # net architecture
 
-optimizer = torch.optim.SGD(net.parameters(), lr=0.02)
+optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
 loss_func = torch.nn.CrossEntropyLoss()  # the target label is NOT an one-hotted
 
 plt.ion()   # something about plotting
 
-for t in range(100):
+for t in range(1000):
     out = net(x)                 # input x and predict based on x
     loss = loss_func(out, y)     # must be (1. nn output, 2. target), the target label is NOT one-hotted
-
+    # print(out)
     optimizer.zero_grad()   # clear gradients for next train
     loss.backward()         # backpropagation, compute gradients
     optimizer.step()        # apply gradients
 
-    if t % 2 == 0:
+    if t % 20 == 0:
         # plot and show learning process
         plt.cla()
-        prediction = torch.max(out, 1)[1]
+        max_s =torch.max(out, 1)#参数1表示维度1内的每个序列选一个最大值。
+        prediction = max_s[1]#参数1代表取最大值在位置列表序列。
+        # print(t, 'out:', out.data.numpy()[:10])
+        # print(t, 'max_s:', max_s)
+        # print(t, 'prediction:', prediction.data.numpy()[:10])
         pred_y = prediction.data.numpy()
         target_y = y.data.numpy()
         plt.scatter(x.data.numpy()[:, 0], x.data.numpy()[:, 1], c=pred_y, s=100, lw=0, cmap='RdYlGn')
         accuracy = float((pred_y == target_y).astype(int).sum()) / float(target_y.size)
         plt.text(1.5, -4, 'Accuracy=%.2f' % accuracy, fontdict={'size': 20, 'color':  'red'})
         plt.pause(0.1)
+
+test_input = np.array([[-1.9, -1.8],[1.9, 7.8]])#两个测试点的横纵坐标。
+te = torch.from_numpy(test_input)#包装为张量
+print("input:",te.data.numpy())
+test_out = net(te.type(torch.FloatTensor))
+print('out:',test_out.data.numpy())
+print('ret:',torch.max(test_out, 1)[1].data.numpy())
+
 
 plt.ioff()
 plt.show()
